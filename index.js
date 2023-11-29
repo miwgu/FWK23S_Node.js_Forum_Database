@@ -176,6 +176,53 @@ function createHeadingListHTML(heading) {
     return heading_html;
 };
 
+
+/**
+ * Post
+ * 1. add a heading to heading.json when click subit button
+ * 2. redirect to the route forum.html 
+ * 3. single HTTP request
+ */
+app.post("/addtopic", function(req,res){
+  
+    if(!req.session.user){
+      res.redirect("/")
+    }
+
+
+    con.connect( (error)=>{
+        if(error){
+            return  console.error("Connection to database failed: "+ error);
+        }
+        console.log("Connection to database succeeded!")
+        
+    
+        let name=req.body.name;
+        let comment= req.body.comment;
+        let user_id= req.session.user.id;
+      
+        console.log("HEADING QUERY PARAMS: "+ JSON.stringify(req.body))
+
+        con.query(
+            `INSERT INTO heading ( name, comment, user_id) VALUES(?,?,?)`,
+            [name, comment, user_id],
+    
+        (error, results) =>{ 
+    
+            if(error){
+                console.error("Serching heading Error!: "+ error);
+                
+                return res.send("Searching heading error!")
+            }
+  
+    //let heading= fs.readFileSync(path.join(__dirname, 'data','heading.json')).toString();
+    //heading= JSON.parse(heading);// from Json to Object
+  
+      return res.redirect("/forum.html");// Redirect to forum.html
+    })
+   })  
+});
+
 /**
  * GET
  * read topic
@@ -186,7 +233,7 @@ app.get("/readtopic.html",function(req,res){
     if(!req.session.user){
       res.redirect("/")
     }
-    let headerId = req.query.id;
+    let headerId =  parseInt(req.query.id);
     console.log("QUERY PARAMS: "+ JSON.stringify(req.query))
     console.log("HEADER ID: "+ headerId)
     
@@ -206,7 +253,9 @@ app.get("/readtopic.html",function(req,res){
             console.log("Connection to database succeeded!")
         
         con.query(
-            'SELECT * FROM heading',
+            'SELECT heading.id as id, users.user as username, heading.name as name, heading.comment as comment, heading.time as time '+ 
+            'FROM heading '+
+            'JOIN users ON users.id = heading.user_id ',
     
             (error, headers, fields) =>{ 
     
@@ -218,7 +267,7 @@ app.get("/readtopic.html",function(req,res){
 
             console.log("Heading"+JSON.stringify(headers))
 
-          let selectedHeader = headers.find(header=> header.id===parseInt(headerId))
+          let selectedHeader = headers.find(header=> header.id===headerId)
           if(selectedHeader){
              output= output.replace('***Thread name***', selectedHeader.name)
           }
@@ -228,7 +277,9 @@ app.get("/readtopic.html",function(req,res){
           //let posts= JSON.parse(fs.readFileSync(path.join(__dirname, 'data','posts.json')).toString());
 
           con.query(
-            'SELECT * FROM posts',
+            'SELECT posts.id as id, posts.heading_id, users.user as username, posts.comment as comment, posts.time as time '+ 
+            'FROM posts '+
+            'JOIN users ON users.id = posts.user_id ',
     
             (error, posts, fields) =>{ 
     
@@ -238,9 +289,9 @@ app.get("/readtopic.html",function(req,res){
                     return res.send("Searching heading error!")
                 }
 
-            console.log("Heading"+JSON.stringify(posts))
+            console.log("Posts"+JSON.stringify(posts))
 
-          let postsByselectedHeader = posts.filter(post => post.heading_id===parseInt(headerId)) //filter() return an array
+          let postsByselectedHeader = posts.filter(post => post.heading_id===headerId) //filter() return an array
           console.log("POSTS: "+JSON.stringify(postsByselectedHeader))// To Json
           if(selectedHeader){
             output=output.replace('***Number***', postsByselectedHeader.length +1)// +1 because first comment is in heading.json
@@ -257,7 +308,7 @@ app.get("/readtopic.html",function(req,res){
           postsHTML+=`
           <tr>
             <th scope="row">1</th>
-            <td>Skrivet av ${selectedHeader.user_id}</td>
+            <td>Skrivet av ${selectedHeader.username}</td>
             <td>${selectedHeader.comment}</td>
             <td>${selectedHeader.time}</td>
           </tr>
@@ -277,8 +328,8 @@ app.get("/readtopic.html",function(req,res){
           
           }
           output=output.replace('<!--***Here printout all posts***-->', postsHTML)
-          output=output.replace(`<button id="submitPostBtn" type="submit" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#postsModal">`,
-          `<button id="submitPostBtn" name ="id" value="${headerId}" type="submit" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#postsModal">`)
+          output=output.replace(`<button id="submitPostBtn" type="submit" class="btn btn-primary" >`,
+          `<button id="submitPostBtn" name ="id" value="${headerId}" type="submit" class="btn btn-primary" >`)
           console.log("Header_id: "+headerId)
           return res.send(output);
         }) //CON QUERY END
@@ -304,7 +355,7 @@ app.get("/readtopic.html",function(req,res){
        `
           <tr>
               <th scope="row">${2+i}</th>
-              <td>Skrivet av ${postsByselectedHeader[i].user_id}</td>
+              <td>Skrivet av ${postsByselectedHeader[i].username}</td>
               <td>${postsByselectedHeader[i].comment}</td>
               <td>${postsByselectedHeader[i].time}</td>
             </tr>
@@ -340,14 +391,15 @@ app.post("/addpost", function(req,res){
     
 
     let comment= req.body.comment;
-    //let time= createFormatTimeStamp(new Date());
-    let heading_id=parseInt(req.body.id);
+    let heading_id=parseInt(req.body.id)
     let user_id= req.session.user.id;
     console.log("HEADING QUERY PARAMS: "+ JSON.stringify(req.body))
     console.log("HEADING_ID"+ heading_id)
-    let sql = `INSERT INTO posts (comment, heading_id, user_id) VALUES('${comment}','${heading_id}','${user_id}')`;
-    console.log(sql);
-    con.query(sql,
+
+
+    con.query(
+        `INSERT INTO posts (comment, heading_id, user_id) VALUES(?, ?, ?)`,
+        [comment, heading_id, user_id],
 
     (error, results) =>{ 
 
