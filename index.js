@@ -103,6 +103,32 @@ app.get("/forum.html",function(req,res){
          output =output.replace("***NAMN***", loggedInUserName);// replase here tu username
     
     //------------------Here show heading list--------------------
+
+    con.connect( (error)=>{
+        if(error){
+            return  console.error("Connection to database failed: "+ error);
+        }
+        console.log("Connection to database succeeded!")
+    
+    con.query(
+        'SELECT heading.id, users.user as username, heading.name, heading.comment '+ 
+        'FROM heading '+
+        'JOIN users ON users.id = heading.user_id ',
+
+        (error, results, fields) =>{ 
+
+            if(error){
+                console.error("Serching heading Error!: "+ error);
+                
+                return res.send("Searching heading error!")
+            }
+
+            console.log("Heading"+JSON.stringify(results))
+            let headingListHTML = createHeadingListHTML(results);// create HTML here
+          console.log(headingListHTML)
+          output=output.replace("<!-- ***Here printout all heading info*** -->",headingListHTML);
+
+
         /*  let heading = JSON.parse(fs.readFileSync(path.join(__dirname, 'data','heading.json')).toString());
           console.log(heading)
           let headingListHTML = createHeadingListHTML(heading);// create HTML here
@@ -111,7 +137,11 @@ app.get("/forum.html",function(req,res){
           output=output.replace("<!-- ***Here printout all heading info*** -->",headingListHTML);
           */
           return res.send(output);
-    });
+        }
+    )
+    })
+});
+
 
     /**
  * function createHeadingListHTML
@@ -133,8 +163,9 @@ function createHeadingListHTML(heading) {
             <div  style="display:flex;">
             
             <button id="goToThread" name="id"  value ="${heading[i].id}"  type="submit" class="btn btn-secondary p-2 m-2 col-md-2">Läs</button>
-             <p class="p-2 m-2 col-md-2 ">${heading[i].user_id}</p> 
              <p class="p-2 m-2 col-md-4 ">${heading[i].name}</p>
+             <p class="p-2 m-2 col-md-2 ">Skapad av ${heading[i].username}</p> 
+             
             </div>
           </form>
         </div>
