@@ -10,6 +10,7 @@ function displayHideCreateThread(event){
         hiddenCreateThreadDiv.style.display='block';
         headingList.style.display='none';
         createThreadBtn.innerHTML="Tillbaka till startsidan";
+        console.log(createThreadBtn.innerHTML);
     }
      else{
          hiddenCreateThreadDiv.style.display='none';

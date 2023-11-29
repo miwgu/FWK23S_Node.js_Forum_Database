@@ -20,6 +20,7 @@ let httpServer = app.listen(port,function(){
 });
 
 app.use(express.urlencoded({extended: true}));
+app.use(express.static(path.join(__dirname, 'public')))
 
 let generateKey =()=>{
     var key =crypto.randomBytes(32).toString('hex');
