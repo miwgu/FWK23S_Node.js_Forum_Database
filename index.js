@@ -125,8 +125,8 @@ app.get("/forum.html",function(req,res){
 
             console.log("Heading"+JSON.stringify(results))
             let headingListHTML = createHeadingListHTML(results);// create HTML here
-          console.log(headingListHTML)
-          output=output.replace("<!-- ***Here printout all heading info*** -->",headingListHTML);
+            console.log(headingListHTML)
+            output=output.replace("<!-- ***Here printout all heading info*** -->",headingListHTML);
 
 
         /*  let heading = JSON.parse(fs.readFileSync(path.join(__dirname, 'data','heading.json')).toString());
@@ -143,7 +143,7 @@ app.get("/forum.html",function(req,res){
 });
 
 
-    /**
+/**
  * function createHeadingListHTML
  * @param {*} heading
  * @returns 
@@ -173,4 +173,190 @@ function createHeadingListHTML(heading) {
       
     }
     return heading_html;
-}
+};
+
+/**
+ * GET
+ * read topic
+ */
+
+
+app.get("/readtopic.html",function(req,res){
+    if(!req.session.user){
+      res.redirect("/")
+    }
+    let headerId = req.query.id;
+    console.log("QUERY PARAMS: "+ JSON.stringify(req.query))
+    console.log("HEADER ID: "+ headerId)
+    
+    let loggedInUserName = req.session.user.name;// declare loggined username
+    //------------------Here show logined user name--------------------
+         let output = fs.readFileSync(path.join(__dirname, 'views', 'readtopic.html')).toString();
+         output =output.replace("***NAMN***", loggedInUserName);// replase here tu username
+    
+    //------------------Here show heading comment list--------------------
+          //let headers = JSON.parse(fs.readFileSync(path.join(__dirname, 'data','heading.json')).toString());
+          //console.log(headers)
+
+          con.connect( (error)=>{
+            if(error){
+                return  console.error("Connection to database failed: "+ error);
+            }
+            console.log("Connection to database succeeded!")
+        
+        con.query(
+            'SELECT * FROM heading',
+    
+            (error, headers, fields) =>{ 
+    
+                if(error){
+                    console.error("Serching heading Error!: "+ error);
+                    
+                    return res.send("Searching heading error!")
+                }
+
+            console.log("Heading"+JSON.stringify(headers))
+
+          let selectedHeader = headers.find(header=> header.id===parseInt(headerId))
+          if(selectedHeader){
+             output= output.replace('***Thread name***', selectedHeader.name)
+          }
+        
+             
+     //------------------Here show posts list--------------------
+          //let posts= JSON.parse(fs.readFileSync(path.join(__dirname, 'data','posts.json')).toString());
+
+          con.query(
+            'SELECT * FROM posts',
+    
+            (error, posts, fields) =>{ 
+    
+                if(error){
+                    console.error("Serching heading Error!: "+ error);
+                    
+                    return res.send("Searching heading error!")
+                }
+
+            console.log("Heading"+JSON.stringify(posts))
+
+          let postsByselectedHeader = posts.filter(post => post.heading_id===parseInt(headerId)) //filter() return an array
+          console.log("POSTS: "+JSON.stringify(postsByselectedHeader))// To Json
+          if(selectedHeader){
+            output=output.replace('***Number***', postsByselectedHeader.length +1)// +1 because first comment is in heading.json
+          }
+  
+      //------------------Here show first comment from heading and posts list--------------------
+         console.log("selectedHeader: "+JSON.stringify(selectedHeader));
+         
+         let postsHTML=
+         `<table  class="table table-striped">
+         <tbody>`;
+  
+         if(selectedHeader){
+          postsHTML+=`
+          <tr>
+            <th scope="row">1</th>
+            <td>Skrivet av ${selectedHeader.user_id}</td>
+            <td>${selectedHeader.comment}</td>
+            <td>${selectedHeader.time}</td>
+          </tr>
+          `;
+        }
+  
+          if(postsByselectedHeader.length===0){
+            postsHTML+=`
+            </tbody>
+            </table>
+            `  
+            
+          } else{
+         
+          postsHTML += createPostsListHTML(postsByselectedHeader);// create HTML here
+          console.log(postsHTML)
+          
+          }
+          output=output.replace('<!--***Here printout all posts***-->', postsHTML)
+          output=output.replace(`<button id="submitPostBtn" type="submit" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#postsModal">`,
+          `<button id="submitPostBtn" name ="id" value="${headerId}" type="submit" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#postsModal">`)
+          console.log("Header_id: "+headerId)
+          return res.send(output);
+        }) //CON QUERY END
+      }) //CON QUERY END
+
+   })
+  });
+
+  /**
+   * Function createPostsListHTML
+   * @param {*} postsByselectedHeader 
+   * @returns 
+   */
+
+  function createPostsListHTML(postsByselectedHeader) {
+
+    let posts_html = '';
+    
+  
+    for(var i=0 ; i<postsByselectedHeader.length; i++){
+      
+        posts_html+=
+       `
+          <tr>
+              <th scope="row">${2+i}</th>
+              <td>Skrivet av ${postsByselectedHeader[i].user_id}</td>
+              <td>${postsByselectedHeader[i].comment}</td>
+              <td>${postsByselectedHeader[i].time}</td>
+            </tr>
+      `
+    }
+  
+    posts_html+= 
+    `
+    </tbody>
+    </table>
+    `
+    return posts_html;
+  
+  }
+
+
+/**
+ *POST
+ * addpost
+ * write a post to database
+ */
+app.post("/addpost", function(req,res){
+  
+  if(!req.session.user){
+    res.redirect("/")
+  }
+
+  con.connect( (error)=>{
+    if(error){
+        return  console.error("Connection to database failed: "+ error);
+    }
+    console.log("Connection to database succeeded!")
+    
+
+    let comment= req.body.comment;
+    //let time= createFormatTimeStamp(new Date());
+    let heading_id=parseInt(req.body.id);
+    let user_id= req.session.user.id;
+    console.log("HEADING QUERY PARAMS: "+ JSON.stringify(req.body))
+    console.log("HEADING_ID"+ heading_id)
+    let sql = `INSERT INTO posts (comment, heading_id, user_id) VALUES('${comment}','${heading_id}','${user_id}')`;
+    console.log(sql);
+    con.query(sql,
+
+    (error, results) =>{ 
+
+        if(error){
+            console.error("Serching heading Error!: "+ error);
+            
+            return res.send("Searching heading error!")
+        }
+
+       return res.redirect("/forum.html");// Redirect to forum.html
+      })
+    })
+});

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <title>Document</title>
+</head>
+<body>
+    
+
+    <div class="container p-3" style="display:flex;">
+        <h5 class="col-6 m-2">Välkommen ***NAMN***!</h5>
+        
+    
+        <form class="col-6 m-2" style="width: fit-content;"  action="/" method="get">
+          <button type="submit" class="btn btn-danger">Log out</button>
+        </form>
+      </div>
+  
+      <hr>
+    <div class="container p-3">
+      <form class="col-12" action="/forum.html">
+        <button id="backtoForum" class="btn btn-outline-primary">Tillbaka till startsidan</button>
+      
+      </form>
+     </div>
+
+     <div class="container p-5">
+       
+        
+        <h5>***Thread name***</h5>
+        
+        <p>Det finns ***Number*** inlägg i denna tråd:</p>
+
+        <!--***Here printout all posts***-->
+
+       <!-- <table  class="table table-striped">
+         <tbody>
+          <tr>
+            <th scope="row">1</th>
+            <td>Skrivet av Mimmi</td>
+            <td>comment...................</td>
+            <td>2022-11-22 17:50:34</td>
+          </tr>
+
+          <tr>
+            <th scope="row">2</th>
+            <td>Skrivet av Hanako</td>
+            <td>comment...................</td>
+            <td>2022-11-22 18:01:02</td>
+          </tr>
+
+          <tr>
+            <th scope="row">3</th>
+            <td>Skrivet av Aki</td>
+            <td>comment...................</td>
+            <td>2022-11-23 09:15:32</td>
+          </tr>
+
+         </tbody>
+        </table>-->
+
+     </div>
+
+  
+    <div id="answerToThread" class="container p-3" >
+      
+      <form class="row g-3" action="/addpost" method="post" >
+        <div class="col-12">
+          <label for="inputComment" class="form-label">Svara på denna tråd</label>
+          <textarea name="comment" class="form-control" id="inputComment" rows="3"></textarea>
+        </div>
+        <div class="col-12">
+          <button id="submitPostBtn" type="submit" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#postsModal">Publicera</button>
+        </div>
+      </form>
+
+    </div>
+
+
+            <!-- Modal -->
+            <div class="modal fade" id="postsModal" tabindex="-1">
+              <div class="modal-dialog">
+              <div class="modal-content">
+                  <div class="modal-header">
+                  <h1 class="modal-title fs-5" id="exampleModalLabel">Inlägget har sparats!</h1>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                  Din änket har skickats.
+                  </div>
+                  <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                  </div>
+              </div>
+              </div>
+          </div>
+         <!-- Modal end-->
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+   
+</body>
+</html>
