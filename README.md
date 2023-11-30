@@ -32,9 +32,9 @@ Express session is middleware for Node.js web applications that enables session 
 - get: /postconfirmation.html ->When you add a post, /addtopi redirects to this page
 
 ## How to start 
-Install 
+npm install 
 Node.js, Nodemon, express, session-express, mysql2
-- npm index.js
+- nodemon index.js
 
 ## Database 
 You can check data.sql
