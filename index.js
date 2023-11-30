@@ -448,6 +448,10 @@ app.post("/addpost", function(req,res){
     })
 });
 
+/**
+ * Post Confirmation
+ * When you add a post, /addtopi redirect to this page
+ */
 app.get ("/postconfirmation.html", function(req,res){
     if (!req.session.user){
        return res.redirect("/")
