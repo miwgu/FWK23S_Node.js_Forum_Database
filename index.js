@@ -112,9 +112,21 @@ app.get("/forum.html",function(req,res){
         console.log("Connection to database succeeded!")
     
     con.query(
-        'SELECT heading.id, users.user as username, heading.name, heading.comment '+ 
-        'FROM heading '+
-        'JOIN users ON users.id = heading.user_id ',
+        //'SELECT heading.id, users.user as username, heading.name, heading.comment '+ 
+        //'FROM heading '+
+        //'JOIN users ON users.id = heading.user_id ',
+        'SELECT h.id AS id, h.name AS name, u.user AS username, ' +
+        'CASE ' +
+        'WHEN p.max_post_time IS NOT NULL THEN p.max_post_time ' +
+        'ELSE h.time ' +
+        'END AS recenttime ' +
+        'FROM heading h ' +
+        'JOIN users u ON u.id = h.user_id ' +
+        'LEFT JOIN ( ' +
+        'SELECT heading_id, MAX(time) AS max_post_time ' +
+        'FROM posts ' +
+        'GROUP BY heading_id ' +
+        ') p ON p.heading_id = h.id ',
 
         (error, results, fields) =>{ 
 
@@ -166,6 +178,7 @@ function createHeadingListHTML(heading) {
             <button id="goToThread" name="id"  value ="${heading[i].id}"  type="submit" class="btn btn-secondary p-2 m-2 col-md-2">Läs</button>
              <p class="p-2 m-2 col-md-4 ">${heading[i].name}</p>
              <p class="p-2 m-2 col-md-2 ">Skapad av ${heading[i].username}</p> 
+             <p class="p-2 m-2 col-md-4 ">${heading[i].recenttime}</p> 
              
             </div>
           </form>
@@ -178,15 +191,15 @@ function createHeadingListHTML(heading) {
 
 
 /**
- * Post
- * 1. add a heading to heading.json when click subit button
+ * Post heading(Rubrik)
+ * 1. add a heading(Rubrik) to heading table when click subit button
  * 2. redirect to the route forum.html 
  * 3. single HTTP request
  */
 app.post("/addtopic", function(req,res){
   
     if(!req.session.user){
-      res.redirect("/")
+     return res.redirect("/")
     }
 
 
@@ -210,28 +223,32 @@ app.post("/addtopic", function(req,res){
         (error, results) =>{ 
     
             if(error){
-                console.error("Serching heading Error!: "+ error);
+                console.error("Adding post Error!: "+ error);
                 
-                return res.send("Searching heading error!")
+                return res.status(500).send("Error adding post")
             }
   
     //let heading= fs.readFileSync(path.join(__dirname, 'data','heading.json')).toString();
     //heading= JSON.parse(heading);// from Json to Object
   
-      return res.redirect("/forum.html");// Redirect to forum.html
+      return res.redirect("/forum.html");// Redirect to forum.html. 
+      
     })
    })  
 });
 
+
+
 /**
  * GET
- * read topic
+ * read topics datail (all posts)
+ * 
  */
 
 
 app.get("/readtopic.html",function(req,res){
     if(!req.session.user){
-      res.redirect("/")
+     return res.redirect("/")
     }
     let headerId =  parseInt(req.query.id);
     console.log("QUERY PARAMS: "+ JSON.stringify(req.query))
@@ -373,8 +390,8 @@ app.get("/readtopic.html",function(req,res){
 
 
 /**
- *POST
- * addpost
+ * POST post
+ * addpost to post table with heading id which buttan has id as value
  * write a post to database
  */
 app.post("/addpost", function(req,res){
@@ -409,7 +426,20 @@ app.post("/addpost", function(req,res){
             return res.send("Searching heading error!")
         }
 
-       return res.redirect("/forum.html");// Redirect to forum.html
+        return res.redirect("/postconfirmation.html");// Redirect to postconfirmation.html
       })
     })
 });
+
+app.get ("/postconfirmation.html", function(req,res){
+    if (!req.session.user){
+       return res.redirect("/")
+    }
+
+    let loggedInUserName = req.session.user.name;// declare loggined username
+    //------------------Here show logined user name--------------------
+         let output = fs.readFileSync(path.join(__dirname, 'views','postconfirmation.html')).toString();
+         output =output.replace("***NAMN***", loggedInUserName);// replase here tu username
+    
+    return res.send(output);
+})
