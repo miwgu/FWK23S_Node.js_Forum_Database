@@ -27,10 +27,16 @@ let generateKey =()=>{
     return key;
 }
 
+//Express.js v4.16.0 and above includes the functionality of cookie-parser by default 
 let userSession = app.use(session({
-  secret:generateKey(),
-  resave:false,
-  saveUninitialized:true
+  secret:generateKey(),// The secret key is used to sign the session ID cookie, adding a layer of security to prevent tampering or unauthorized access.
+  resave:false,//avoid unnecessary writes to the session store
+  saveUninitialized:true,//create a session for every user
+  cookie:{
+    httpOnly: true,//prevent certain types of XSS attacks client side cannot accress the cookie
+    secure: false,//false->the cookie will be sent over HTTP(not only HTTPS)
+    maxage: 1000 * 60 * 60 *2// 2 hour
+    }
 }));
 
 
@@ -188,7 +194,7 @@ function createHeadingListHTML(heading) {
             <button id="goToThread" name="id"  value ="${heading[i].id}"  type="submit" class="btn btn-secondary p-2 m-2 col-md-2">Läs</button>
              <p class="p-2 m-2 col-md-4 ">${heading[i].name}</p>
              <p class="p-2 m-2 col-md-2 ">Skapad av ${heading[i].username}</p> 
-             <p class="p-2 m-2 col-md-4 ">${heading[i].recenttime}</p> 
+             <p class="p-2 m-2 col-md-4 ">${heading[i].recent_time}</p> 
              
             </div>
           </form>
