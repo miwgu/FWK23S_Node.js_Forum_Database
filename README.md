@@ -29,11 +29,11 @@ Express session is middleware for Node.js web applications that enables session 
 - post: /addtopic -> Add a heading(Rubrik) to heading table
 - get: /readtopic.html-> Output heading(Rubrik) and all posts with name and time
 - post: /addpost-> Add a post to posts table with heading id which buttan has id as value
-- get: /postconfirmation.html ->When you add a post, /addtopi redirects to this page
+- get: /postconfirmation.html ->When you add a post, /addpost redirects to this page
 
 ## How to start (Node.js)
 npm install 
-nodemon -g, express, session-express, mysql2 (mysql2: This is for MySQL workbench. If you use other database you need chack which you need to indtall.)
+nodemon -g, express, session-express, mysql2 (mysql2: This is for MySQL workbench. If you use other database you need to check which you need to indtall.)
 - nodemon index.js
 - user: "root", password: "" ...//You need to change code, your user and password in index.js to log in your database 
 
