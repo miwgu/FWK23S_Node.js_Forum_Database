@@ -31,9 +31,9 @@ Express session is middleware for Node.js web applications that enables session 
 - post: /addpost-> Add a post to posts table with heading id which buttan has id as value
 - get: /postconfirmation.html ->When you add a post, /addtopi redirects to this page
 
-## How to start 
+## How to start (Node.js)
 npm install 
-Node.js, Nodemon, express, session-express, mysql2
+nodemon -g, express, session-express, mysql2
 - nodemon index.js
 
 ## Database 
