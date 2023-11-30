@@ -7,9 +7,10 @@
     <title>Login</title>
   </head>
   <body>
-    <h5></h5>
+    
 
     <div class="container m-5">
+      <h5>Forum Login</h5>
     <form  action="/checklogin" method="post"> 
       <div class="mb-3">
         <label for="name" class="form-label">Username:</label>
@@ -21,7 +22,8 @@
         <input name="pass"   type="password" class="form-control" id="password">
       </div>
       
-      <button type="submit" class="btn btn-primary">Submit</button>
+      <div class="mb-3" id="errorMessage"  style="display: none; color: rgb(236, 44, 44);">LOGIN FEL! Vänligen försök igen!</div>
+      <button type="submit" class="btn btn-primary">Log in</button>
     </form>
   </div>
   

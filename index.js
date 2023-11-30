@@ -83,8 +83,8 @@ app.post("/checklogin", function(req, res){
 
                 let output = fs.readFileSync(path.join(__dirname, 'views', 'login.html')).toString();
               output = output.replace(
-             "<h5>",
-              "<h5>LOGIN FAILD! Please try it again!<br><hr>"
+             `<div class="mb-3" id="errorMessage"  style="display: none; color: rgb(236, 44, 44);">`,
+             `<div class="mb-3" id="errorMessage"  style="display: block; color: rgb(236, 44, 44);">`
              );
                 
                 return res.send(output);
