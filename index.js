@@ -3,7 +3,7 @@ let mysql = require("mysql2"); // "npm i mysql2"
 let con = mysql.createConnection({
     host: "localhost",
     user: "root",
-    password: "Miwakodori23!",
+    password: "Miwakodori23!",// Here I need to add my password
     database: "forum_db"
 });
 
@@ -37,6 +37,11 @@ let userSession = app.use(session({
 app.get("/", function(req, res){
     res.sendFile(path.join(__dirname,'views','login.html'));
 })
+
+/**
+ * POST checklogin
+ * If user and pass is match with data in database user can login
+ */
 
 app.post("/checklogin", function(req, res){
     let {user, pass}=req.body;
@@ -87,15 +92,19 @@ app.post("/checklogin", function(req, res){
 
 
 /**
- * Get
- * Output username and heading list
- *
+ * Get forum
+ * Output heading(Rubrik), user, recent time and Läs button
+ * Each Läs button has heading id as value 
+ * Show heading(Rubrik) order by recent_time DESC
+ * recenttime:  If there is just heading "comment" recenttime is the time when heding is added
+ *              If there is other posts "comment" recenttime is the time when the newest post is added 
+ * 
  */
 
 
 app.get("/forum.html",function(req,res){
     if(!req.session.user){
-      res.redirect("/")
+      return res.redirect("/")
     }
     
     let loggedInUserName = req.session.user.name;// declare loggined username
@@ -119,14 +128,15 @@ app.get("/forum.html",function(req,res){
         'CASE ' +
         'WHEN p.max_post_time IS NOT NULL THEN p.max_post_time ' +
         'ELSE h.time ' +
-        'END AS recenttime ' +
+        'END AS recent_time ' +
         'FROM heading h ' +
         'JOIN users u ON u.id = h.user_id ' +
         'LEFT JOIN ( ' +
         'SELECT heading_id, MAX(time) AS max_post_time ' +
         'FROM posts ' +
         'GROUP BY heading_id ' +
-        ') p ON p.heading_id = h.id ',
+        ') p ON p.heading_id = h.id ' +
+        'ORDER BY recent_time DESC',
 
         (error, results, fields) =>{ 
 
@@ -167,7 +177,7 @@ function createHeadingListHTML(heading) {
     let heading_html = '';
     
   
-    for(var i=heading.length-1; i>=0; i--){
+    for(var i=0; i<heading.length; i++){
       
         heading_html+=
         `
@@ -191,10 +201,11 @@ function createHeadingListHTML(heading) {
 
 
 /**
- * Post heading(Rubrik)
- * 1. add a heading(Rubrik) to heading table when click subit button
- * 2. redirect to the route forum.html 
- * 3. single HTTP request
+ * Post addtopic (Rubrik)
+ * add a heading(Rubrik) to heading table when user click submit button
+ * write a heading to database
+ * redirect to the route forum.html 
+ * 
  */
 app.post("/addtopic", function(req,res){
   
@@ -223,9 +234,9 @@ app.post("/addtopic", function(req,res){
         (error, results) =>{ 
     
             if(error){
-                console.error("Adding post Error!: "+ error);
+                console.error("Adding heading Error!: "+ error);
                 
-                return res.status(500).send("Error adding post")
+                return res.status(500).send("Error adding heading")
             }
   
     //let heading= fs.readFileSync(path.join(__dirname, 'data','heading.json')).toString();
@@ -240,12 +251,11 @@ app.post("/addtopic", function(req,res){
 
 
 /**
- * GET
- * read topics datail (all posts)
- * 
+ * GET readtopic
+ * Output heading(Rubrik) and all posts with name and time
+ * If there is just heading show heding and comment
+ * If there is post hedding show heding comment and posts comment 
  */
-
-
 app.get("/readtopic.html",function(req,res){
     if(!req.session.user){
      return res.redirect("/")
@@ -277,9 +287,9 @@ app.get("/readtopic.html",function(req,res){
             (error, headers, fields) =>{ 
     
                 if(error){
-                    console.error("Serching heading Error!: "+ error);
+                    console.error("Display heading Error!: "+ error);
                     
-                    return res.send("Searching heading error!")
+                    return res.send("Display heading error!")
                 }
 
             console.log("Heading"+JSON.stringify(headers))
@@ -301,9 +311,9 @@ app.get("/readtopic.html",function(req,res){
             (error, posts, fields) =>{ 
     
                 if(error){
-                    console.error("Serching heading Error!: "+ error);
+                    console.error("Display posts Error!: "+ error);
                     
-                    return res.send("Searching heading error!")
+                    return res.send("Display posts error!")
                 }
 
             console.log("Posts"+JSON.stringify(posts))
@@ -390,9 +400,10 @@ app.get("/readtopic.html",function(req,res){
 
 
 /**
- * POST post
+ * POST addpost
  * addpost to post table with heading id which buttan has id as value
  * write a post to database
+ * redirect to postconfirmation.html
  */
 app.post("/addpost", function(req,res){
   
@@ -421,9 +432,9 @@ app.post("/addpost", function(req,res){
     (error, results) =>{ 
 
         if(error){
-            console.error("Serching heading Error!: "+ error);
+            console.error("Adding post Error!: "+ error);
             
-            return res.send("Searching heading error!")
+            return res.status(500).send("Adding post error!")
         }
 
         return res.redirect("/postconfirmation.html");// Redirect to postconfirmation.html
