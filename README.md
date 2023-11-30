@@ -33,8 +33,9 @@ Express session is middleware for Node.js web applications that enables session 
 
 ## How to start (Node.js)
 npm install 
-nodemon -g, express, session-express, mysql2
+nodemon -g, express, session-express, mysql2 (mysql2: This is for MySQL workbench. If you use other database you need chack which you need to indtall.)
 - nodemon index.js
+- user: "root", password: "" ...//You need to change code, your user and password in index.js to log in your database 
 
 ## Database 
 You can check data.sql
