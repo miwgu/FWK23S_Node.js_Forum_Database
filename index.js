@@ -3,7 +3,7 @@ let mysql = require("mysql2"); // "npm i mysql2"
 let con = mysql.createConnection({
     host: "localhost",
     user: "root",
-    password: "Miwakodori23!",// Here I need to add my password
+    password: "",// Here I need to add my password
     database: "forum_db"
 });
 
